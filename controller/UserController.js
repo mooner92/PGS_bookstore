@@ -1,14 +1,18 @@
 const conn = require('../mariadb');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
+const ctypto = require('crypto'); //암호화
 dotenv.config();
 const {StatusCodes} = require('http-status-codes');
 const { cookie } = require('express-validator');
 
 const join = (req,res)=>{
     const {email, password} = req.body;
-    let sql = 'INSERT INTO users (email, password) VALUES (?, ?)';
-    let values = [email,password];
+    const salt = ctypto.randomBytes(10).toString('base64'); //이렇게 하면 랜덤으로 됨
+    const hashPassword = ctypto.pbkdf2Sync(password,salt,10000,10,'sha512').toString('base64'); //10글자의 암호화를 함
+
+    let sql = 'INSERT INTO users (email, password, salt) VALUES (?, ?, ?)';
+    let values = [email,hashPassword,salt];
 
     conn.query(sql,values,
     (err,results) => {
@@ -33,7 +37,8 @@ const login = (req,res)=>{
                 return res.status(StatusCodes.BAD_REQUEST).end(); //BAD REQ
             }
             const loginUser = results[0];
-            if(loginUser && loginUser.password ==password){
+            const hashPassword = ctypto.pbkdf2Sync(password,loginUser.salt,10000,10,'sha512').toString('base64'); //10글자의 암호화를 함
+            if(loginUser && loginUser.password ==hashPassword){
                 const token = jwt.sign({
                     email : loginUser.email
                 },process.env.PRIVATE_KEY,{
@@ -79,8 +84,11 @@ const passwordResetRequest = (req,res)=>{
 
 const passwordReset = (req,res)=>{
     const {email,password} = req.body;
-    let sql = 'UPDATE users SET password=? WHERE email=?';
-    let values = [password,email];
+    let sql = 'UPDATE users SET password=?, salt=? WHERE email=?';
+    
+    const salt = ctypto.randomBytes(10).toString('base64'); //이렇게 하면 랜덤으로 됨
+    const hashPassword = ctypto.pbkdf2Sync(password,salt,10000,10,'sha512').toString('base64'); //10글자의 암호화를 함
+    let values = [hashPassword,salt,email];
     conn.query(sql,values,
         (err,results) => {
             if(err){
