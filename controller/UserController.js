@@ -4,7 +4,7 @@ const dotenv = require('dotenv');
 const ctypto = require('crypto'); //암호화
 dotenv.config();
 const {StatusCodes} = require('http-status-codes');
-const { cookie } = require('express-validator');
+//const { cookie } = require('express-validator');
 
 const join = (req,res)=>{
     const {email, password} = req.body;
