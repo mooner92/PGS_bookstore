@@ -10,7 +10,6 @@ router.get('/:id',bookDetail);
 
 router.get('/',booksByCategory);
 
-
 module.exports = router;
 
 //
