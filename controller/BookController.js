@@ -3,7 +3,7 @@ const {StatusCodes} = require('http-status-codes');
 
 
 const allBooks = (req,res)=>{
-    let {category_id} = req.query;
+    let {category_id,news} = req.query;
     if(category_id){
         let sql = "SELECT * FROM books WHERE category_id=?";
 
@@ -60,3 +60,4 @@ module.exports = {
     bookDetail,
     booksByCategory
 }
+////
