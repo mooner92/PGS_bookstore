@@ -9,4 +9,3 @@ router.get('/',allCategory);
 //router.get('/:id',bookDetail);
 
 module.exports = router;
-///
